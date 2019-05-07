@@ -34,7 +34,7 @@ app.post('/upload', upload.single('fileUpload'), (req, res, next) => {
     body = req.body || {};
     body.uploadId = body.uploadId || uuid.v1();
     body.title = body.title || "Custom Title";
-    body.filepath = (req.file || {}).filepath || "";
+    body.filepath = ((req.file || {}).path || "").split("/uploads/")[1];
     body.processImage = (body.processImage === "true" || body.processImage === true) ? true : false;
     console.log(JSON.stringify(body, null, 2))
     res.json({

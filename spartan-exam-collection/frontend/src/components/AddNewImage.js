@@ -46,7 +46,7 @@ class AddNewImage extends Component {
         fD.append('processImage', this.state.processImage);
         fD.append('description', this.state.description);
         api.call({
-            body: fD,
+            data: fD,
             url: '/upload',
             method: 'POST'
         }).then((data) => { 
