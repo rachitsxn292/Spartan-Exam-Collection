@@ -1,0 +1,1 @@
+export const projectServer = "http://localhost:3001";

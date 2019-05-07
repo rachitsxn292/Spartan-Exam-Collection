@@ -2,24 +2,158 @@ var express = require('express');
 var app = express();
 var cors = require('cors');
 var bodyParser = require('body-parser');
-var fileUpload = require('express-fileupload');
+var uuid = require('uuid');
+var multer = require('multer');
 var mongoose = require('mongoose');
 var uploadExam = require('./models/uploadExam');
 var Profile = require('./models/profile');
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(cors());
-app.use(fileUpload());
-
+var myBookmarks = ["1", "2", "4"];
 
 //MONGODB CONNECT STRING
-mongoose.connect('mongodb+srv://spartan:spartan@cluster0-bduua.mongodb.net/test?retryWrites=true');
+//mongoose.connect('mongodb+srv://spartan:spartan@cluster0-bduua.mongodb.net/test?retryWrites=true');
 //MONGDB CONNECTION STRING END
 
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+var multer = require('multer')
+var upload = multer({
+    dest: process.cwd() + "/../uploads"
+})
 
+app.post('/upload', upload.single('fileUpload'), (req, res, next) => {
+    console.log(req.file)
+    body = req.body || {};
+    body.uploadId = body.uploadId || uuid.v1();
+    body.title = body.title || "Custom Title";
+    body.filepath = (req.file || {}).filepath || "";
+    body.processImage = (body.processImage === "true" || body.processImage === true) ? true : false;
+    console.log(JSON.stringify(body, null, 2))
+    res.json({
+        result: "success",
+        response: [{
+            code: "CARDS",
+            message: "Data Fetched Successfully"
+        }]
+    });
+});
+app.post('/user/:userId/bookmark/:uploadId', (req, res, next) => {
+    let uploadId = req.params.uploadId;
+    let _index = myBookmarks.indexOf(uploadId);
+    if (_index >= 0) {
+        myBookmarks.splice(_index, 1);
+    } else {
+        myBookmarks.push(uploadId);
+    }
+    res.json({
+        result: "success",
+        response: [{
+            code: "CARDS",
+            message: "Data Fetched Successfully"
+        }]
+    });
+})
+app.get('/user/:userId/bookmarked', (req, res, next) => {
+    res.json({
+        result: "success",
+        response: [{
+            code: "CARDS",
+            message: "Data Fetched Successfully"
+        }],
+        cards: [{
+            userId: "123",
+            uploadId: "1",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
+            imageSource: "http://www.africau.edu/images/default/sample.pdf"
+        }, {
+            userId: "123",
+            uploadId: "2",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A",
+            imageSource: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A"
+        }, {
+            userId: "123",
+            uploadId: "4",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
+            imageSource: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg"
+        }]
+    })
+})
+app.get('/user/:userId', (req, res, next) => {
+    res.json({
+        result: "success",
+        response: [{
+            code: "CARDS",
+            message: "Data Fetched Successfully"
+        }],
+        user: {
+            userId: "123",
+            firstName: "Vinit",
+            lastName: "Dholakia",
+            email: "vinit.dholakia@sjsu.edu",
+            bookmarked: myBookmarks,
+        }
+    })
+})
+app.get('/search', (req, res, next) => {
+    res.json({
+        result: "success",
+        response: [{
+            code: "CARDS",
+            message: "Data Fetched Successfully"
+        }],
+        cards: [{
+            userId: "123",
+            uploadId: "1",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
+            imageSource: "http://www.africau.edu/images/default/sample.pdf"
+        }, {
+            userId: "123",
+            uploadId: "2",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A",
+            imageSource: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A"
+        }, {
+            userId: "123",
+            uploadId: "3",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://pro2-bar-s3-cdn-cf3.myportfolio.com/560d16623f9c2df9615744dfab551b3d/e50c016f-b6a8-4666-8fb8-fe6bd5fd9fec_rw_1920.jpeg?h=dc627898fc5eac88aa791fb2b124ecbd",
+            imageSource: "https://pro2-bar-s3-cdn-cf3.myportfolio.com/560d16623f9c2df9615744dfab551b3d/e50c016f-b6a8-4666-8fb8-fe6bd5fd9fec_rw_1920.jpeg?h=dc627898fc5eac88aa791fb2b124ecbd"
+        }, {
+            userId: "123",
+            uploadId: "4",
+            title: "First Image",
+            description: "Lorem Ipsum About the image",
+            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
+            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
+            imageSource: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg"
+        }]
+    })
+})
+/*
 app.get('/', (req, res) => {
     res.send("In Spartan Exam Collection");
 
@@ -93,7 +227,7 @@ app.post('/upload', function (req, res) {
     var randomString = "";
     var group = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for (var i = 0; i < 5; i++){
+    for (var i = 0; i < 5; i++) {
         randomString += group.charAt(Math.floor(Math.random() * group.length));
     }
 
@@ -230,6 +364,6 @@ app.post('/search', (req, res) => {
         })
     }
 })
-
+*/
 app.listen(3001);
 console.log("server running 3001");

@@ -5,7 +5,8 @@ const profileSchema = mongoose.Schema({
     fname: String,
     lname: String,
     email: String,
-    image: String
+    image: String,
+    bookmarked : [String]
   
    });
 
