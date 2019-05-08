@@ -25,9 +25,11 @@ service.validate = (token) => {
     });
 };
 service.verifyRequest = (req, res, next) => {
+    console.log(req.headers);
     let token = (req.headers['authorization'] || "").split('Bearer ')[1] || req.query.token || "";
     service.validate(token).then((payload) => {
         req.session = payload;
+        console.log(payload)
         return Profile.findOne({
             userId : payload.userId
         })

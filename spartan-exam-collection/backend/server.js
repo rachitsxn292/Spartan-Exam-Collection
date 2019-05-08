@@ -46,7 +46,7 @@ var upload = multer({
         }
     }),
 })
-app.post('/upload',jwt.verifyRequest, upload.array('fileUpload', 10), (req, res, next) => {
+app.post('/upload', jwt.verifyRequest, upload.array('fileUpload', 10), (req, res, next) => {
     body = req.body || {};
     body.uploadId = body.uploadId || uuid.v1();
     body.title = body.title || "Custom Title";
@@ -74,75 +74,105 @@ app.post('/upload',jwt.verifyRequest, upload.array('fileUpload', 10), (req, res,
 });
 app.post('/user/:userId/bookmark/:uploadId', (req, res, next) => {
     let uploadId = req.params.uploadId;
-    let _index = myBookmarks.indexOf(uploadId);
-    if (_index >= 0) {
-        myBookmarks.splice(_index, 1);
-    } else {
-        myBookmarks.push(uploadId);
-    }
-    res.json({
-        result: "success",
-        response: [{
-            code: "CARDS",
-            message: "Data Fetched Successfully"
-        }]
-    });
+    let userId = req.params.userId;
+    Profile.findOne({
+        userId: userId
+    }).then((dbObj) => {
+        if (!!dbObj) {
+            let myBookmarks = dbObj.bookmarked || []
+            let _index = myBookmarks.indexOf(uploadId);
+            if (_index >= 0) {
+                myBookmarks.splice(_index, 1);
+            } else {
+                myBookmarks.push(uploadId);
+            };
+            Profile.findOneAndUpdate({
+                userId: userId
+            }, {
+                bookmarked: myBookmarks
+            }, {
+                new: true
+            }).then((dbObj) => {
+                console.log("NEW DATA ", dbObj)
+                res.json({
+                    result: "success",
+                    message: "Bookmark Toggled",
+                    user: dbObj
+                });
+            }).catch(() => {
+                res.json({
+                    result: "success",
+                    message: "Bookmark Toggled"
+                });
+            })
+
+        } else {
+            res.json({
+                result: "success",
+                message: "Bookmark Toggled"
+            });
+        }
+    }).catch(() => {
+        res.json({
+            result: "success",
+            message: "Bookmark Toggled"
+        });
+    })
+
 })
 app.get('/user/:userId/bookmarked', (req, res, next) => {
-    res.json({
-        result: "success",
-        response: [{
-            code: "CARDS",
-            message: "Data Fetched Successfully"
-        }],
-        cards: [{
-            userId: "123",
-            uploadId: "1",
-            title: "First Image",
-            description: "Lorem Ipsum About the image",
-            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
-            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
-            imageSource: "http://www.africau.edu/images/default/sample.pdf"
-        }, {
-            userId: "123",
-            uploadId: "2",
-            title: "First Image",
-            description: "Lorem Ipsum About the image",
-            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
-            imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A",
-            imageSource: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQakR3znFWxs9eKLqYWrOTTE8R9l6m3PZg9rPxCA2kOMqQXC88M2A"
-        }, {
-            userId: "123",
-            uploadId: "4",
-            title: "First Image",
-            description: "Lorem Ipsum About the image",
-            tags: ["rakesh", "ranjan", "cmpe", "272", "project"],
-            imageUrl: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg",
-            imageSource: "https://www.jagranjosh.com/imported/images/E/Articles/2017-Solved-CBSE-Sample-Paper-Class%2010-Maths-SA-2.jpg"
-        }]
+    Profile.findOne({
+        userId: req.params.userId
+    }).then((data) => {
+        if (!!data) {
+            let bookmarked = data.bookmarked || [];
+            uploadExam.find({
+                uploadId: {
+                    $in: bookmarked
+                }
+            }).then((data) => {
+                data = data || [];
+                res.json({
+                    result: 'success',
+                    message: "Cards Rendered",
+                    cards: data || []
+                })
+            })
+        } else {
+            res.json({
+                result: 'failure',
+                message: "Failed"
+            })
+        }
+    }).catch(() => {
+        res.json({
+            result: 'failure',
+            message: "Failed"
+        })
     })
 })
 app.get('/user/:userId', (req, res, next) => {
-    res.json({
-        result: "success",
-        response: [{
-            code: "CARDS",
-            message: "Data Fetched Successfully"
-        }],
-        user: {
-            userId: "123",
-            firstName: "Vinit",
-            lastName: "Dholakia",
-            email: "vinit.dholakia@sjsu.edu",
-            bookmarked: myBookmarks,
-        }
+    Profile.findOne({
+        userId: req.params.userId
+    }).then((data) => {
+        res.json({
+            result: "success",
+            message: "Data Fetched Successfully",
+            user: data || {}
+        })
+    }).catch(() => {
+        res.json({
+            result: 'failure',
+            message: "Failed"
+        })
     })
+
 })
 app.get('/image/:filepath', (req, res, next) => {
     let filename = req.params.filepath || null;
     res.sendFile(path.resolve("../uploads/" + filename));
 })
-app.get('/search',jwt.verifyRequest, (req, res, next) => {
+app.get('/search', jwt.verifyRequest, (req, res, next) => {
     if (!req.query.q) {
         res.json({
             result: "success",
@@ -199,7 +229,7 @@ app.post('/signin', (req, res, next) => {
                                 image: req.body.image,
                             },
                             token: jwt.generate({
-                                userId :userId
+                                userId: userId
                             })
                         });
                     })
@@ -218,7 +248,7 @@ app.post('/signin', (req, res, next) => {
                     message: 'signin successful',
                     data: docs,
                     token: jwt.generate({
-                        userId :docs.userId
+                        userId: docs.userId
                     })
                 });
             }

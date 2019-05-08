@@ -13,6 +13,8 @@ export default class API {
                 return;
             }
             options.url = `${constants.projectServer}${options.url}`;
+            options.headers =options.headers || {};
+            options.headers['authorization'] = "Bearer " + localStorage.getItem("token");
             axios({
                 params: options.query || {},
                 headers: options.headers || {},
