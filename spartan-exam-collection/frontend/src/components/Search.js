@@ -12,35 +12,48 @@ export default class Search extends Component {
         if (!!e) {
             e.preventDefault();
         }
+
         let value = ((e || {}).target || {}).value || "";
-        api.call({
-            url: '/user/123',
-            method: "GET",
-        }).then((dbObj) => {
-            let userObj = dbObj.user || {};
-            api.call({
-                url: '/search',
-                method: "GET",
-                query: {
-                    q: "vinit"
-                }
-            }).then((data) => {
-                this.setState({
-                    cards: data.cards || [],
-                    user: userObj
-                });
-            }).catch((err) => {
-                this.setState({
-                    cards: [],
-                    error: err.message || "Error Fetching Data"
-                });
-            });
-        }).catch(err => {
+        console.log(value)
+        if(!value){
             this.setState({
                 cards: [],
-                error: err.message || "Error Fetching Data"
+                error: ""
             });
-        })
+        }else{
+            api.call({
+                url: '/user/123',
+                method: "GET",
+            }).then((dbObj) => {
+                let userObj = dbObj.user || {};
+                api.call({
+                    url: '/search',
+                    method: "GET",
+                    query: {
+                        q: value || ""
+                    }
+                }).then((data) => {
+                    this.setState({
+                        cards: !!this.userExists() ? data.cards : [],
+                        user: !!this.userExists() ? userObj : {},
+                        error: !this.userExists() ? "Login First" : ""
+                    });
+                }).catch((err) => {
+                    this.setState({
+                        cards: [],
+                        error: !this.userExists() ? "Login First" : (err.message || "Error Fetching Data")
+                    });
+                });
+            }).catch(err => {
+                this.setState({
+                    cards: [],
+                    error: !this.userExists() ? "Login First" : (err.message || "Error Fetching Data")
+                });
+            })
+        }
+       
+
+
 
     };
     bookmarkUpload = (uploadId) => {
@@ -65,6 +78,10 @@ export default class Search extends Component {
         this.props.changeActiveTab("Search");
         this.searchNow();
     }
+    userExists = ()=>
+    {
+        return !!localStorage.getItem("token") ? true : false;
+    }
     render() {
 
         return (
@@ -74,7 +91,7 @@ export default class Search extends Component {
                 </div>}
 
                 <div className="input-group">
-                    <input type="text" className="form-control" aria-label="Text input with segmented dropdown button" />
+                    <input type="text" className="form-control" aria-label="Text input with segmented dropdown button" onChange={this.searchNow}/>
                     <div className="input-group-append">
                         <button type="button" className="btn btn-outline-secondary"><i className="fas fa-search"></i>&nbsp;Search</button>
                     </div>
@@ -88,7 +105,7 @@ export default class Search extends Component {
                     })
                     }
                 </div>
-                {!!this.state.cards && !this.state.cards.length && <h5><i>No Data Available</i></h5>}
+                {!!this.state.cards && !this.state.cards.length && <h6><i>Empty Search Result</i></h6>}
 
 
             </div>

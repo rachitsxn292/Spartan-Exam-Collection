@@ -1,14 +1,13 @@
 const mongoose=require('mongoose');
 
 const uploadExamSchema=mongoose.Schema({
-    _id:mongoose.Schema.Types.ObjectId,
-    filelocation:String,
-    filename:String,
-    courseName: String,
-    courseID: String,
-    professor: String,
-    term: String,
-    year: String,
+    fileLocation: {type:String,required:true},
+    uploadId: {type:String,required:true},
+    title: {type:String,required:true},
+    description: String,
+    processImage : Boolean,
+    imageProcessed : Boolean,
+    tags : String
 })
 
 module.exports=mongoose.model('uploadexam',uploadExamSchema);

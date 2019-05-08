@@ -1,0 +1,16 @@
+try:  
+    from PIL import Image
+except ImportError:  
+    import Image
+import pytesseract
+import sys
+def ocr_core(filename):  
+    """
+    This function will handle the core OCR processing of images.
+    """
+    text = pytesseract.image_to_string(Image.open(filename))  # We'll use Pillow's Image class to open the image and pytesseract to detect the string in the image
+    return text
+print(sys.argv[1])
+print(sys.argv[2])
+print(ocr_core(sys.argv[1]))  
+sys.stdout.flush()

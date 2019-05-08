@@ -16,9 +16,9 @@ export default class CardComponent extends Component {
                 <div class="card card-inverse card-info">
                     <div class="card-header">
                         <a onClick={this.props.bookmarkUpload(obj.uploadId)}><i class="fas fa-bookmark float-right" style={this.getBookmarkStyle()}></i></a>
-                        <a href={obj.imageSource} target="_blank"><i class="fas fa-eye float-right" style={{ marginLeft: '10px' }}></i></a>
+                        <a href={`http://localhost:3001/image/${obj.fileLocation}`} target="_blank"><i class="fas fa-eye float-right" style={{ marginLeft: '10px' }}></i></a>
                     </div>
-                    <img class="card-img-top" src={obj.imageUrl} />
+                    <img class="card-img-top" src={`http://localhost:3001/image/${obj.fileLocation}`} />
                     <div class="card-body">
                         <h5 className="card-title">{obj.title}</h5>
                         <p class="card-text">

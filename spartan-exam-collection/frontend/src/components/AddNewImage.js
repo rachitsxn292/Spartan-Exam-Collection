@@ -9,34 +9,70 @@ class AddNewImage extends Component {
         file: null,
         _url: null,
         processImage: true,
-        title: null,
-        description: null,
-        error: ""
+        title: "",
+        description: "",
+        error: "",
+        success : "",
     }
     _handleImageChange = (e) => {
         e.preventDefault();
+        if(!this.userExists()){
+            this.setState({
+                error : "Login First",
+                success : "",
+            });
+            return
+        }
+        
         let reader = new FileReader();
         let file = e.target.files[0];
         reader.onloadend = () => {
             this.setState({
                 file: file,
-                _url: reader.result
+                _url: reader.result,
+                success : "",
+                error : ""
             });
         }
         reader.readAsDataURL(file)
     }
     handleTextChange = (e) => {
+        if(!this.userExists()){
+            this.setState({
+                error : "Login First",
+                success : "",
+            });
+            return
+        }
         this.setState({
             [e.target.name]: e.target.value,
+            success : "",
+            error : ""
         });
     }
     handleCheckBox = (e) => {
+        if(!this.userExists()){
+            this.setState({
+                error : "Login First",
+                success : "",
+            });
+            return
+        }
         console.log("VLAUE  ", e.target.name, e.target.value)
         this.setState({
             processImage: !this.state.processImage,
+            success : "",
+            error : ""
         });
     }
     uploadImage = (e) => {
+        if(!this.userExists()){
+            this.setState({
+                error : "Login First",
+                success : "",
+            });
+            return
+        }
         e.preventDefault();
         let auth = this.props.auth;
         let fD = new FormData();
@@ -45,19 +81,45 @@ class AddNewImage extends Component {
         fD.append('title', this.state.title);
         fD.append('processImage', this.state.processImage);
         fD.append('description', this.state.description);
-        api.call({
-            data: fD,
-            url: '/upload',
-            method: 'POST'
-        }).then((data) => { 
-            console.log(data) 
-        }).catch((err) => {
-            console.log(err);
-        })
+        if (!this.state.title || !this.state.file) {
+            this.setState({
+                error: "Some fields are Missing !"
+            })
+        } else {
+            let str = this.state.processImage ? "Your Image will be processed shortly." : ''
+            api.call({
+                data: fD,
+                url: '/upload',
+                method: 'POST'
+            }).then((data) => {
+                this.setState({
+                    file: null,
+                    _url: null,
+                    processImage: true,
+                    title: "",
+                    description: "",
+                    error: "",
+                    success : `Your image has been successfully uploaded. ${str}`
+                })
+            }).catch((err) => {
+                console.log(err);
+            })
+        }
         //do some Call
     }
     componentDidMount = () => {
         this.props.changeActiveTab("New");
+        if(!this.userExists()){
+            this.setState({
+                error : "Login First",
+                success : "",
+            });
+            return
+        }
+    }
+    userExists = ()=>
+    {
+        return !!localStorage.getItem("token") ? true : false;
     }
     render() {
         let { _url } = this.state || {};
@@ -69,6 +131,12 @@ class AddNewImage extends Component {
         }
         return (
             <div>
+                {!!this.state.error && <div class="alert alert-warning" role="alert">
+                    Sorry! {this.state.error}
+                </div>}
+                {!!this.state.success && <div class="alert alert-success" role="alert">
+                    Voila! {this.state.success}
+                </div>}
                 <h4 className="text-center">Upload New Paper/Book</h4>
                 <div className="input-group">
                     <div className="input-group-prepend">
@@ -88,12 +156,12 @@ class AddNewImage extends Component {
                         <form>
                             <div class="form-group">
                                 <label for="exampleInputtitle1">Title</label>
-                                <input type="title" name="title" class="form-control" id="exampleInputtitle1" aria-describedby="titleHelp" placeholder="Enter Title" onChange={this.handleTextChange} required />
+                                <input type="title" name="title" class="form-control" id="exampleInputtitle1" aria-describedby="titleHelp" placeholder="Enter Title" onChange={this.handleTextChange} value={this.state.title} required />
                                 <small id="titleHelp" class="form-text text-muted">Title of the Image</small>
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputDescription1">Description</label>
-                                <input type="Description" name="description" class="form-control" id="exampleInputDescription1" placeholder="Brief Description" onChange={this.handleTextChange} />
+                                <input type="Description" name="description" class="form-control" id="exampleInputDescription1" placeholder="Brief Description" value={this.state.description} onChange={this.handleTextChange} />
                             </div>
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="exampleCheck1" onChange={this.handleCheckBox} checked={this.state.processImage} />

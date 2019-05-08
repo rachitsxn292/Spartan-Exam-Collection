@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Auth from './auth';
-import * as constants  from './constants'
+import * as constants from './constants'
 const auth = new Auth();
 export default class API {
     call = (options) => {
@@ -17,32 +17,14 @@ export default class API {
                 params: options.query || {},
                 headers: options.headers || {},
                 data: options.data || {},
-                method : options.method || "GET",
-                url : options.url
+                method: options.method || "GET",
+                url: options.url
             }).then((response) => {
                 let data = response.data || {};
                 if (data.result === "success") {
                     resolve(data)
-                } else if (data.result === "failure") {
-                    if (!!(data.response || {}).code) {
-                        data.response = [data.response]
-                    }
-                    data.response = data.response || [{
-                        code: "TOKENERROR"
-                    }];
-                    if (data.response[0].code === "TOKENERROR") {
-                        // logout
-                    } else {
-                        reject({
-                            result: "failure",
-                            message: data.response[0].message || "Some Error with the Server"
-                        });
-                    }
                 } else {
-                    reject({
-                        result: "failure",
-                        message: "Some Error with the Server"
-                    });
+                    reject(data)
                 }
             }).catch((err) => {
                 reject({

@@ -10,10 +10,9 @@ class Sidebar extends Component {
             return ""
     }
     logoutNow = ()=>{
-        localStorage.removeItem('x-access-token');
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('expiresAt');
-        this.props.history.push('/');
+        this.props.history.push('/home');
     }
   render() {
     let auth = this.props.auth;

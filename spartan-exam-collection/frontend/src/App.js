@@ -12,8 +12,7 @@ class App extends Component {
    return (
       <Router>
         <div>
-          <Route path="/home" render={(props) => <HomeComponents auth={auth} {...props} />} />
-          <Route exact path="/" render={(props) => <Login auth={auth} {...props} />} />
+          <Route path="/" render={(props) => <HomeComponents auth={auth} {...props} />} />
         </div>
       </Router>
    );
